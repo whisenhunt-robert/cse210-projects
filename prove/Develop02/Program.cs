@@ -5,44 +5,47 @@ using System.IO;
 // Entry Class: Represents a single journal entry.
 public class Entry
 {
+    // Properties representing the entry's prompt, response, date, and mood.
     public string Prompt { get; private set; }
     public string Response { get; private set; }
     public DateTime Date { get; set; }
     public string Mood { get; set; }
 
-    // Constructor to create a new entry
+    // Constructor initializes the entry with a prompt, response, and mood.
     public Entry(string prompt, string response, string mood)
     {
         Prompt = prompt;
         Response = response;
-        Date = DateTime.Now;
+        Date = DateTime.Now;  // Automatically sets the current date and time.
         Mood = mood;
     }
 
-    // Overriding ToString to display the entry in a readable format
+    // Provides a string representation of the entry, formatted for display.
     public override string ToString()
     {
         return $"{Date.ToShortDateString()} - {Prompt}\n{Response}\nMood: {Mood}\n";
     }
 }
 
-// Journal Class: Manages a collection of entries.
+// Journal Class: Manages the collection of journal entries.
 public class Journal
 {
+    // List to hold all the journal entries.
     private List<Entry> Entries { get; set; }
 
+    // Constructor initializes an empty list for journal entries.
     public Journal()
     {
         Entries = new List<Entry>();
     }
 
-    // Add a new entry to the journal
+    // Adds a new entry to the journal with a given prompt, response, and mood.
     public void AddEntry(string prompt, string response, string mood)
     {
         Entries.Add(new Entry(prompt, response, mood));
     }
 
-    // Display all entries in the journal
+    // Displays all entries in the journal, or a message if there are none.
     public void DisplayEntries()
     {
         if (Entries.Count == 0)
@@ -51,17 +54,19 @@ public class Journal
             return;
         }
 
+        // Loop through each entry and print it to the console.
         foreach (var entry in Entries)
         {
             Console.WriteLine(entry);
         }
     }
 
-    // Save journal entries to a file
+    // Saves all journal entries to a file with the given filename.
     public void SaveToFile(string filename)
     {
         using (var writer = new StreamWriter(filename))
         {
+            // Write each entry to the file, separated by '|' characters.
             foreach (var entry in Entries)
             {
                 writer.WriteLine($"{entry.Date.ToShortDateString()}|{entry.Prompt}|{entry.Response}|{entry.Mood}");
@@ -69,16 +74,19 @@ public class Journal
         }
     }
 
-    // Load journal entries from a file
+    // Loads journal entries from a file and replaces the current entries.
     public void LoadFromFile(string filename)
     {
-        if (!File.Exists(filename))
+        if (!File.Exists(filename)) 
         {
             Console.WriteLine("File not found.");
             return;
         }
 
+        // Clear existing entries before loading new ones.
         Entries.Clear();
+
+        // Read each line from the file and create entries.
         foreach (var line in File.ReadLines(filename))
         {
             var parts = line.Split('|');
@@ -88,21 +96,24 @@ public class Journal
                 var prompt = parts[1];
                 var response = parts[2];
                 var mood = parts[3];
+
+                // Add the new entry with the loaded data.
                 Entries.Add(new Entry(prompt, response, mood) { Date = date });
             }
         }
     }
 }
 
-// Main Program: Provides the menu system and user interaction
+// Program Class: Handles the user interaction, menu, and journal operations.
 class Program
 {
     static void Main()
     {
         var journal = new Journal();
+
+        // Dictionary of mood-based prompts for personalized journaling.
         var moodPrompts = new Dictionary<string, List<string>>
-        {   
-            // Prompts for happy mood
+        {
             { "Happy", new List<string>
                 {
                     "What are three things that made you smile today?",
@@ -110,7 +121,6 @@ class Program
                     "How did your happiness affect your actions today?"
                 }
             },
-            // Prompts for sad mood
             { "Sad", new List<string>
                 {
                     "What made you feel down today?",
@@ -118,7 +128,6 @@ class Program
                     "Is there something you can do to lift your spirits?"
                 }
             },
-            // Prompts for anxious mood
             { "Anxious", new List<string>
                 {
                     "What are you anxious about today?",
@@ -126,7 +135,6 @@ class Program
                     "Have you dealt with this type of anxiety before?"
                 }
             },
-            // Prompts for excited mood
             { "Excited", new List<string>
                 {
                     "What are you most excited about right now?",
@@ -134,7 +142,6 @@ class Program
                     "What goals are you eager to achieve?"
                 }
             },
-            // Prompts for "Other" mood
             { "Other", new List<string>
                 {
                     "What’s on your mind today?",
@@ -144,6 +151,7 @@ class Program
             }
         };
 
+        // Main loop for menu-driven user interaction.
         while (true)
         {
             Console.WriteLine("Journal Menu:");
@@ -159,10 +167,9 @@ class Program
             switch (choice)
             {
                 case "1":
-                    // Write a new entry with mood
+                    // Prompt the user to choose their mood.
                     Random rand = new Random();
 
-                    // Ask for the user's mood
                     Console.WriteLine("How did you feel today?");
                     Console.WriteLine("1. Happy\n2. Sad\n3. Anxious\n4. Excited\n5. Other");
                     string moodChoice = Console.ReadLine();
@@ -175,7 +182,7 @@ class Program
                         _ => "Other"
                     };
 
-                    // Select a prompt based on mood
+                    // Select a random prompt based on the user's mood.
                     var promptsForMood = moodPrompts[mood];
                     string prompt = promptsForMood[rand.Next(promptsForMood.Count)];
 
@@ -183,18 +190,18 @@ class Program
                     Console.Write("Your response: ");
                     string response = Console.ReadLine();
 
-                    // Add the entry to the journal
+                    // Add the new entry to the journal with the chosen mood.
                     journal.AddEntry(prompt, response, mood);
                     Console.WriteLine($"Entry added with mood: {mood}");
                     break;
 
                 case "2":
-                    // Display journal
+                    // Display all journal entries.
                     journal.DisplayEntries();
                     break;
 
                 case "3":
-                    // Save journal to file
+                    // Prompt the user for a filename and save the journal to it.
                     Console.Write("Enter the filename to save the journal: ");
                     string saveFile = Console.ReadLine();
                     journal.SaveToFile(saveFile);
@@ -202,7 +209,7 @@ class Program
                     break;
 
                 case "4":
-                    // Load journal from file
+                    // Prompt the user for a filename and load the journal from it.
                     Console.Write("Enter the filename to load the journal from: ");
                     string loadFile = Console.ReadLine();
                     journal.LoadFromFile(loadFile);
@@ -210,16 +217,17 @@ class Program
                     break;
 
                 case "5":
-                    // Exit the program
-                    Console.WriteLine("May God be with you till you write again!");
+                    // Exit the program.
+                    Console.WriteLine("Goodbye!");
                     return;
 
                 default:
+                    // Handle invalid menu choices.
                     Console.WriteLine("Invalid choice, please try again.");
                     break;
             }
 
-            Console.WriteLine(); // Blank line for separation
+            Console.WriteLine(); // Blank line for separation.
         }
     }
 }
